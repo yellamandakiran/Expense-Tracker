@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        <i class="fa-solid fa-wallet"></i>
+        <span>FinanceAI</span>
+    </div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a class="active" href="/dashboard">Dashboard</a>
+        <a href="/predict">Prediction</a>
+    </div>
+
+</nav>
+
+
+<div class="home-container">
+
+    <div class="hero-content" style="text-align:center;margin-top:40px">
+
+        <span class="badge">
+            Financial Dashboard
+        </span>
+
+        <h1>Your Financial Overview</h1>
+
+        <p>
+            Monitor your income, expenses and balance.
+        </p>
+
+    </div>
+
+
+    <div class="features-section">
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                <i class="fa-solid fa-dollar-sign"></i>
+            </div>
+
+            <h3>Total Income</h3>
+
+            <h2 style="color:#63e6be;">
+                ${{ total_income }}
+            </h2>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+
+            <h3>Total Expenses</h3>
+
+            <h2 style="color:#ff7d8b;">
+                ${{ total_expense }}
+            </h2>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <h3>Current Balance</h3>
+
+            <h2 style="color:#64e2be;">
+                ${{ balance }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="transaction-card">
+
+        <h2 style="margin-bottom:20px">
+            Recent Transactions
+        </h2>
+
+        <table style="width:100%;border-collapse:collapse;">
+
+            <thead>
+
+            <tr style="background:#12253d;">
+
+                <th style="padding:15px;">Type</th>
+
+                <th>Category</th>
+
+                <th>Amount</th>
+
+                <th>Date</th>
+
+                <th>Description</th>
+
+                <th>Action</th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for transaction in transactions %}
+
+            <tr style="text-align:center;">
+
+                <td style="padding:15px">
+                    {{ transaction.transaction_type }}
+                </td>
+
+                <td>
+                    {{ transaction.category }}
+                </td>
+
+                <td>
+                    ${{ transaction.amount }}
+                </td>
+
+                <td>
+                    {{ transaction.transaction_date }}
+                </td>
+
+                <td>
+                    {{ transaction.description }}
+                </td>
+
+                <td>
+
+                    <form action="/delete/{{ transaction.id }}"
+                          method="POST">
+
+                        <button class="submit-button"
+                                style="padding:8px 15px;font-size:13px;">
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
