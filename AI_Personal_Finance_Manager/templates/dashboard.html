@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | FinanceAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="navbar">
+    <div class="logo"><i class="fa-solid fa-wallet"></i><span>FinanceAI</span></div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a class="active" href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('predict') }}">Prediction</a>
+    </div>
+</nav>
+<main class="home-container dashboard-container">
+    <div class="hero-content dashboard-heading">
+        <span class="badge">Financial Dashboard</span>
+        <h1>Your Financial Overview</h1>
+        <p>Monitor your income, expenses, balance, and category-wise spending.</p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}<div class="alert-message"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>{% endfor %}
+    {% endwith %}
+
+    <section class="summary-grid">
+        <article class="feature-card"><div class="feature-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div><h3>Total Income</h3><h2>{{ total_income|currency }}</h2></article>
+        <article class="feature-card"><div class="feature-icon expense-icon"><i class="fa-solid fa-money-bill-wave"></i></div><h3>Total Expenses</h3><h2 class="negative-text">{{ total_expense|currency }}</h2></article>
+        <article class="feature-card"><div class="feature-icon"><i class="fa-solid fa-wallet"></i></div><h3>Current Balance</h3><h2 class="{{ 'negative-text' if balance < 0 else '' }}">{{ balance|currency }}</h2></article>
+    </section>
+
+    <section class="dashboard-grid">
+        <div class="transaction-card chart-card">
+            <h2>Expense Distribution</h2>
+            {% if category_values %}<canvas id="expenseChart" aria-label="Expense category chart"></canvas>{% else %}<p class="empty-state">Add expense transactions to view the chart.</p>{% endif %}
+        </div>
+        <div class="transaction-card transactions-card">
+            <h2>Recent Transactions</h2>
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="transactions-table">
+                    <thead><tr><th>Type</th><th>Category</th><th>Amount</th><th>Date</th><th>Description</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td><span class="type-badge {{ transaction.transaction_type|lower }}">{{ transaction.transaction_type }}</span></td>
+                        <td>{{ transaction.category }}</td>
+                        <td>{{ transaction.amount|currency }}</td>
+                        <td>{{ transaction.transaction_date }}</td>
+                        <td>{{ transaction.description or '—' }}</td>
+                        <td><form action="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" method="POST"><button class="delete-button" type="submit"><i class="fa-solid fa-trash"></i> Delete</button></form></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}<p class="empty-state">No transactions have been added yet.</p>{% endif %}
+        </div>
+    </section>
+</main>
+<footer><p>FinanceAI <span>•</span> Smart financial planning made simple</p></footer>
+{% if category_values %}
+<script>
+new Chart(document.getElementById('expenseChart'), {
+    type: 'doughnut',
+    data: { labels: {{ category_names|tojson }}, datasets: [{ data: {{ category_values|tojson }}, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#dce5f0' } } } }
+});
+</script>
+{% endif %}
+</body>
+</html>

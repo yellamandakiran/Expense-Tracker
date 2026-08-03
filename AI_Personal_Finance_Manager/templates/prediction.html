@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Prediction | FinanceAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="logo"><i class="fa-solid fa-wallet"></i><span>FinanceAI</span></div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a class="active" href="{{ url_for('predict') }}">Prediction</a>
+    </div>
+</nav>
+<main class="home-container">
+    <section class="transaction-section">
+        <div class="form-information">
+            <span class="badge">AI Prediction</span>
+            <h2>Predict Your Monthly Expense</h2>
+            <p>Enter your monthly financial details to estimate expenses and savings.</p>
+        </div>
+        <div class="transaction-card">
+            {% with messages = get_flashed_messages() %}
+                {% for message in messages %}<div class="alert-message"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>{% endfor %}
+            {% endwith %}
+            <form action="{{ url_for('predict') }}" method="POST">
+                <div class="form-grid prediction-grid">
+                    {% set fields = [
+                        ('income', 'Monthly Income', 'fa-indian-rupee-sign'),
+                        ('food', 'Food Expense', 'fa-utensils'),
+                        ('transport', 'Transport Expense', 'fa-bus'),
+                        ('shopping', 'Shopping Expense', 'fa-cart-shopping'),
+                        ('bills', 'Bills', 'fa-file-invoice-dollar')
+                    ] %}
+                    {% for name, label, icon in fields %}
+                    <div class="input-group">
+                        <label for="{{ name }}">{{ label }}</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid {{ icon }}"></i>
+                            <input id="{{ name }}" type="number" name="{{ name }}" min="0" step="0.01"
+                                   value="{{ form_values[name] }}" placeholder="Enter {{ label }}" required>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="submit-button" type="submit"><i class="fa-solid fa-brain"></i> Predict Expense</button>
+            </form>
+
+            {% if result %}
+            <div class="prediction-result">
+                {% if result.error %}
+                    <h2>Prediction Unavailable</h2>
+                    <p class="negative-text">{{ result.error }}</p>
+                {% else %}
+                    <h2>Prediction Result</h2>
+                    <div class="result-grid">
+                        <div><span>Estimated Expense</span><strong>{{ result.predicted_expense|currency }}</strong></div>
+                        <div><span>Estimated Savings</span><strong class="{{ 'negative-text' if result.savings < 0 else '' }}">{{ result.savings|currency }}</strong></div>
+                    </div>
+                    <p class="result-message">{{ result.message }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+<footer><p>FinanceAI <span>•</span> Smart financial planning made simple</p></footer>
+</body>
+</html>
